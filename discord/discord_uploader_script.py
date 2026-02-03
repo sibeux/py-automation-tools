@@ -12,15 +12,18 @@ load_dotenv()  # otomatis baca file .env di direktori sekarang
 
 # --- KONFIGURASI ---
 TOKEN = os.getenv("DISCORD_TOKEN")
-THREAD_ID = 1467820696502796453  # Pastikan ini ID Thread, bukan Channel biasa
-FOLDER_PATH = rf"C:\Users\Nasrul Wahabi\Downloads\Documents\WhatsApp Images"
+THREAD_ID = 1468069714516246604  # Pastikan ini ID Thread, bukan Channel biasa
+FOLDER_PATH = rf"C:\Users\Nasrul Wahabi\Downloads\Documents\status\1"
 DELAY = 5  # Detik
 # -------------------
+
+# Pilih ekstensi
+ekstensi = ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic')
+# ekstensi = ('.mp4', '.mkv', '.mov', '.avi', '.wmv', '.flv', '.webm')
 
 LARGE_FILES_FOLDER = os.path.join(FOLDER_PATH, "large_files")
 # Buat folder large_files jika belum ada
 os.makedirs(LARGE_FILES_FOLDER, exist_ok=True)
-
 
 class BatchUploader(discord.Client):
     async def on_ready(self):
@@ -33,15 +36,14 @@ class BatchUploader(discord.Client):
             await self.close()
             return
 
-        # Ambil semua file gambar
+        # Ambil semua file gambar/video
         MAX_SIZE = 10 * 1024 * 1024  # 10 MB dalam bytes
 
         all_files = []
 
         for f in os.listdir(FOLDER_PATH):
             # Cek ekstensi
-            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic')):
-            # if f.lower().endswith(('.mp4', '.mkv', '.mov', '.avi', '.wmv', '.flv', '.webm')):
+            if f.lower().endswith(ekstensi):
                 full_path = os.path.join(FOLDER_PATH, f)
                 # Cek ukuran file (<= 10 MB)
                 try:
@@ -92,7 +94,6 @@ class BatchUploader(discord.Client):
 
         print("Selesai semua upload!")
         await self.close()
-
 
 intents = discord.Intents.default()
 client = BatchUploader(intents=intents)
