@@ -14,8 +14,10 @@ repository untuk menjaga dokumentasi tetap selaras dengan tools yang tersedia.
 
 CC @Sibeux ~ Nasrul Wahabi
 
-
 ## 🛠 Tools yang Tersedia
+
+### Discord
+- **discord uploader script** — Uploader gambar/video ke thread Discord.
 
 ### Filesystem
 - **diversivied files** — Membagi file menjadi beberapa folder.
