@@ -12,8 +12,8 @@ load_dotenv()  # otomatis baca file .env di direktori sekarang
 
 # --- KONFIGURASI ---
 TOKEN = os.getenv("DISCORD_TOKEN")
-THREAD_ID = 1468069714516246604  # Pastikan ini ID Thread, bukan Channel biasa
-FOLDER_PATH = rf"C:\Users\Nasrul Wahabi\Downloads\Documents\status\1"
+THREAD_ID = 1468073619962990765  # Pastikan ini ID Thread, bukan Channel biasa
+FOLDER_PATH = rf"C:\Users\Nasrul Wahabi\Downloads\Documents\status\2"
 DELAY = 5  # Detik
 # -------------------
 
