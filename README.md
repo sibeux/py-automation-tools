@@ -22,5 +22,8 @@ CC @Sibeux ~ Nasrul Wahabi
 ### Filesystem
 - **diversivied files** — Membagi file menjadi beberapa folder.
 
+### Formatter
+- **datetime unix** — Formatting current date and time into string representations.
+
 ### Security
 - **password hash generator** — Buat password hash.
