@@ -12,14 +12,15 @@ load_dotenv()  # otomatis baca file .env di direktori sekarang
 
 # --- KONFIGURASI ---
 TOKEN = os.getenv("DISCORD_TOKEN")
-THREAD_ID = 1468220081749364861  # Pastikan ini ID Thread, bukan Channel biasa
-FOLDER_PATH = rf"C:\Users\Nasrul Wahabi\Downloads\Documents\status\6"
+THREAD_ID = 1497555220291653813  # Pastikan ini ID Thread, bukan Channel biasa
+FOLDER_PATH = rf"C:\Users\Nasrul Wahabi\Downloads\Compressed\Video Received 2 - nov 15 2022"
 DELAY = 5  # Detik
 # -------------------
 
 # Pilih ekstensi
 ekstensi = ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic')
-# ekstensi = ('.mp4', '.mkv', '.mov', '.avi', '.wmv', '.flv', '.webm')
+ekstensi = ('.mp4', '.mkv', '.mov', '.avi', '.wmv', '.flv', '.webm', 'm4a')
+# ekstensi = ('.pdf')
 
 LARGE_FILES_FOLDER = os.path.join(FOLDER_PATH, "large_files")
 # Buat folder large_files jika belum ada
