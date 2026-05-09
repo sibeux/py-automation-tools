@@ -7,6 +7,10 @@ import shutil
 import discord
 import os
 import asyncio
+import re
+
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
 load_dotenv()  # otomatis baca file .env di direktori sekarang
 
@@ -73,7 +77,7 @@ class BatchUploader(discord.Client):
                     except OSError as e:
                         print(f"Error mengakses {f}: {e}")
 
-            all_files.sort()  # Urutkan nama file
+            all_files.sort(key=natural_sort_key)  # Urutkan nama file secara natural
 
             if not all_files:
                 print(f"Tidak ada file untuk kategori {current_ext}.")
