@@ -17,6 +17,7 @@ CC @Sibeux ~ Nasrul Wahabi
 ## 🛠 Tools yang Tersedia
 
 ### Discord
+- **discord read message thread** — Reader gambar/video dari thread Discord.
 - **discord uploader script** — Uploader gambar/video ke thread Discord.
 
 ### Filesystem
@@ -27,3 +28,6 @@ CC @Sibeux ~ Nasrul Wahabi
 
 ### Security
 - **password hash generator** — Buat password hash.
+
+### Telegram
+- **telegram uploader script** — Uploader audio ke topic Telegram.
