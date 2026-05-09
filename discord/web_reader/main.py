@@ -1,4 +1,5 @@
 import asyncio
+import re
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -7,6 +8,9 @@ import discord
 from dotenv import load_dotenv
 import os
 import sys
+
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
 # Load .env file (looks in current and parent directories)
 load_dotenv()
@@ -89,8 +93,8 @@ async def get_comic_pages(thread_id: int):
                             "timestamp": message.created_at.isoformat()
                         })
         
-        # Sortir file gambar berdasarkan nama file agar berurutan (misal: page1.jpg, page2.jpg)
-        all_pages.sort(key=lambda x: x['filename'].lower())
+        # Sortir file gambar secara alami (Natural Sorting) agar berurutan (misal: 1.jpg, 2.jpg, 11.jpg)
+        all_pages.sort(key=lambda x: natural_sort_key(x['filename']))
         
         # Ambil nama parent channel jika ada
         parent_name = None

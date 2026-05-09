@@ -55,9 +55,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressText = document.getElementById('progressText');
     const progressBar = document.getElementById('progressBar');
     const toastContainer = document.getElementById('toastContainer');
+    
+    const floatingControlBar = document.querySelector('.floating-control-bar');
+    const controlTriggerZone = document.querySelector('.control-trigger-zone');
+
+    // --- AUTO HIDE CONTROL BAR LOGIC ---
+    let controlBarTimeout = null;
+    let isHoveringControls = false;
+
+    // --- LAZY LOAD OBSERVER ---
+    let lazyImageObserver = null;
 
     // --- INITIALIZATION ---
     renderHistory();
+
+    // Initialize IntersectionObserver for Webtoon lazy loading
+    if ('IntersectionObserver' in window) {
+        lazyImageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    
+                    img.onload = () => {
+                        img.classList.add('loaded');
+                    };
+                    
+                    observer.unobserve(img); // Stop observing once loaded
+                }
+            });
+        }, {
+            root: viewerViewport,
+            rootMargin: '500px 0px 500px 0px' // Preload images 500px before they enter viewport
+        });
+    }
 
     // --- EVENT LISTENERS ---
     loadBtn.addEventListener('click', () => loadComicFromInput());
@@ -68,8 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
     backBtn.addEventListener('click', () => {
         readerPage.style.display = 'none';
         landingPage.style.display = 'flex';
+        document.body.classList.remove('reader-active'); // Unlock body scroll
         state.activeThreadId = null;
         renderHistory();
+        clearTimeout(controlBarTimeout);
     });
 
     webtoonModeBtn.addEventListener('click', () => setViewMode('webtoon'));
@@ -86,6 +119,51 @@ document.addEventListener('DOMContentLoaded', () => {
     fullscreenBtn.addEventListener('click', toggleFullscreen);
     
     clearHistoryBtn.addEventListener('click', clearAllHistory);
+
+    // Book mode image transition on load
+    activeBookImage.addEventListener('load', () => {
+        activeBookImage.classList.add('loaded');
+    });
+
+    // Auto-hide control bar event listeners (Ultra-robust coordinate checking)
+    if (floatingControlBar) {
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        const handleInteraction = (e) => {
+            // Prevent synthetic/stationary triggers
+            if (e.type === 'mousemove' && e.clientX === lastMouseX && e.clientY === lastMouseY) return;
+            if (e.type === 'mousemove') {
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+            }
+
+            // Detect Y coordinate relative to window height (130px threshold near bottom)
+            const isNearBottom = e.clientY > window.innerHeight - 130;
+
+            console.log("[Auto-Hide Debug] Interaction:", e.type, "at Y:", e.clientY, "Window Height:", window.innerHeight, "isNearBottom:", isNearBottom);
+
+            if (isNearBottom) {
+                isHoveringControls = true;
+                showControlBar();
+                clearTimeout(controlBarTimeout); // hold indefinitely while near bottom
+                console.log("[Auto-Hide Debug] Cursor near bottom, cleared timeout");
+            } else {
+                isHoveringControls = false;
+                showControlBar();
+                resetControlBarTimeout(); // hide after 3s of inactivity
+            }
+        };
+
+        document.addEventListener('mousemove', (e) => {
+            if (state.activeThreadId === null) return;
+            handleInteraction(e);
+        });
+        document.addEventListener('click', (e) => {
+            if (state.activeThreadId === null) return;
+            handleInteraction(e);
+        });
+    }
 
     // Keyboard Navigation
     document.addEventListener('keydown', (e) => {
@@ -176,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initReaderUI() {
         landingPage.style.display = 'none';
         readerPage.style.display = 'flex';
+        document.body.classList.add('reader-active'); // Lock body scroll and isolate layout
 
         comicTitle.textContent = state.comicTitle;
         comicCategory.textContent = state.category;
@@ -186,6 +265,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Load content based on mode
         setViewMode(state.viewMode);
+
+        // Show control bar initially and start timeout
+        showControlBar();
+        resetControlBarTimeout();
     }
 
     // Render list of thumbnails in sidebar
@@ -236,23 +319,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Render Webtoon continuous scroll images
+    // Render Webtoon continuous scroll images (With premium Lazy Loading)
     function renderWebtoonImages() {
         webtoonContainer.innerHTML = '';
         state.pages.forEach((page, index) => {
             const img = document.createElement('img');
-            img.src = page.url;
+            img.dataset.src = page.url; // Save source in data-src
             img.alt = `Halaman ${index + 1}`;
             img.className = 'webtoon-page';
             img.id = `webtoon-page-${index}`;
-            img.loading = 'lazy';
             
-            // Preserve aspect ratio while loading
+            // Preserve aspect ratio while loading to prevent layout shifts
             if (page.width && page.height) {
                 img.style.aspectRatio = `${page.width} / ${page.height}`;
             }
             
             webtoonContainer.appendChild(img);
+
+            // Observe the image for lazy loading
+            if (lazyImageObserver) {
+                lazyImageObserver.observe(img);
+            } else {
+                // Fallback for older browsers
+                img.src = page.url;
+                img.onload = () => img.classList.add('loaded');
+            }
         });
         applyZoom();
     }
@@ -262,11 +353,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.pages.length === 0) return;
         const page = state.pages[state.currentPageIndex];
         
+        activeBookImage.classList.remove('loaded'); // Reset transition state
         activeBookImage.src = page.url;
         activeBookImage.alt = `Halaman ${state.currentPageIndex + 1}`;
         
         // Highlight active thumbnail in sidebar and scroll it into view
-        updateActiveSidebarItem();
+        updateActiveSidebarItem(true);
         
         // Update progress indicators
         updateProgress();
@@ -297,16 +389,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             updateBookPage();
         }
-        updateActiveSidebarItem();
+        updateActiveSidebarItem(true);
     }
 
     // Update sidebar highlighted thumbnail
-    function updateActiveSidebarItem() {
+    function updateActiveSidebarItem(scrollIntoView = false) {
         const items = pageList.querySelectorAll('.thumb-item');
         items.forEach((item, index) => {
             if (index === state.currentPageIndex) {
                 item.classList.add('active');
-                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                if (scrollIntoView) {
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
             } else {
                 item.classList.remove('active');
             }
@@ -333,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.currentPageIndex !== currentActive) {
             state.currentPageIndex = currentActive;
-            updateActiveSidebarItem();
+            updateActiveSidebarItem(false);
             updateProgress();
         }
     }
@@ -541,6 +635,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 inThrottle = true;
                 setTimeout(() => inThrottle = false, limit);
             }
+        }
+    }
+
+    // --- AUTO HIDE HELPERS ---
+    function showControlBar() {
+        console.log("[Auto-Hide Debug] showControlBar() called");
+        if (floatingControlBar) {
+            floatingControlBar.classList.remove('hidden');
+        }
+    }
+
+    function hideControlBar() {
+        console.log("[Auto-Hide Debug] hideControlBar() called, isHoveringControls:", isHoveringControls);
+        if (floatingControlBar && !isHoveringControls) {
+            floatingControlBar.classList.add('hidden');
+            console.log("[Auto-Hide Debug] Added .hidden class successfully");
+        }
+    }
+
+    // Export so they can be tested via console if needed
+    window.showControlBar = showControlBar;
+    window.hideControlBar = hideControlBar;
+
+    function resetControlBarTimeout() {
+        console.log("[Auto-Hide Debug] resetControlBarTimeout() called");
+        clearTimeout(controlBarTimeout);
+        if (!isHoveringControls) {
+            controlBarTimeout = setTimeout(hideControlBar, 3000); // 3 seconds
+            console.log("[Auto-Hide Debug] Started 3s timer");
         }
     }
 });

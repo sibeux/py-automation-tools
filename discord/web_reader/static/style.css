@@ -445,7 +445,7 @@ body {
 .reader-workspace {
     display: flex;
     flex: 1;
-    height: calc(100% - 60px); /* minus title-bar & control-bar heights roughly */
+    min-height: 0; /* Lets flexbox dynamically calculate height based on viewport */
     overflow: hidden;
     position: relative;
 }
@@ -459,6 +459,9 @@ body {
     flex-direction: column;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 15;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
 }
 
 .sidebar-drawer.collapsed {
@@ -493,6 +496,7 @@ body {
 .page-list-container {
     flex: 1;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 1rem;
     display: flex;
     flex-direction: column;
@@ -553,6 +557,7 @@ body {
 /* Main Viewport */
 .viewer-viewport {
     flex: 1;
+    min-height: 0; /* Crucial to prevent content-based expansion and enable scrolling */
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
@@ -579,7 +584,28 @@ body {
     height: auto;
     display: block;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(15px);
+    background: linear-gradient(110deg, #100b1a 8%, #1b122c 18%, #100b1a 33%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+}
+
+.webtoon-page.loaded {
+    opacity: 1;
+    transform: translateY(0);
+    background: transparent;
+    animation: none;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 /* Book Mode (Page-by-page) */
@@ -611,7 +637,14 @@ body {
     box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     object-fit: contain;
     border-radius: 8px;
-    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.book-image.loaded {
+    opacity: 1;
+    transform: scale(1);
 }
 
 /* Zoom Adjustments */
@@ -655,11 +688,23 @@ body {
    FLOATING CONTROL BAR (Glassmorphism)
    ========================================================================== */
 
-.floating-control-bar {
-    position: absolute;
-    bottom: 2rem;
+.control-trigger-zone {
+    position: fixed;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
+    width: 65%;
+    height: 110px;
+    z-index: 99;
+    background: transparent;
+    pointer-events: auto;
+}
+
+.floating-control-bar {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(0) scale(1);
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -671,7 +716,16 @@ body {
     gap: 0.8rem;
     box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 1px rgba(255,255,255,0.1) inset;
     z-index: 100;
-    transition: var(--transition-smooth);
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+    opacity: 1;
+    visibility: visible;
+}
+
+.floating-control-bar.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(25px) scale(0.96);
+    pointer-events: none;
+    visibility: hidden;
 }
 
 .floating-control-bar:hover {
@@ -858,4 +912,17 @@ body {
         height: 100%;
         z-index: 1000;
     }
+}
+
+/* Lock global scrolling and fix height when reader is open */
+body.reader-active {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+body.reader-active .app-container {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
 }
