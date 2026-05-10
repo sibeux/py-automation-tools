@@ -8,9 +8,24 @@ import discord
 import os
 import asyncio
 import re
+import datetime
 
 def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
+
+MONTHS_ID = {
+    1: "Januari", 2: "Februari", 3: "Maret", 4: "April",
+    5: "Mei", 6: "Juni", 7: "Juli", 8: "Agustus",
+    9: "September", 10: "Oktober", 11: "November", 12: "Desember"
+}
+
+def get_file_date_str(path):
+    try:
+        ts = os.path.getmtime(path)
+        dt = datetime.datetime.fromtimestamp(ts)
+        return f"{dt.day} {MONTHS_ID[dt.month]} {dt.year}"
+    except Exception:
+        return "Unknown"
 
 load_dotenv()  # otomatis baca file .env di direktori sekarang
 
@@ -33,7 +48,8 @@ DELAY = 5  # Detik
 EKSTENSI_GROUPS = [
     ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic'),
     ('.mp4', '.mkv', '.mov', '.avi', '.wmv', '.flv', '.webm', '.m4a'),
-    ('.pdf',)
+    ('.pdf'),
+    ('.opus', '.mp3')
 ]
 
 LARGE_FILES_FOLDER = os.path.join(FOLDER_PATH, "large_files")
@@ -96,8 +112,16 @@ class BatchUploader(discord.Client):
                         path = os.path.join(FOLDER_PATH, filename)
                         files_to_send.append(discord.File(path))
 
-                    # Kirim 1 pesan berisi banyak file
-                    await thread.send(files=files_to_send)
+                    # Ambil tanggal file pertama dan terakhir di batch ini
+                    first_path = os.path.join(FOLDER_PATH, chunk[0])
+                    last_path = os.path.join(FOLDER_PATH, chunk[-1])
+                    first_date = get_file_date_str(first_path)
+                    last_date = get_file_date_str(last_path)
+                    
+                    caption = f"Batch {index + 1} / {first_date} - {last_date}"
+
+                    # Kirim 1 pesan berisi caption dan banyak file
+                    await thread.send(content=caption, files=files_to_send)
 
                     print(
                         f'Batch {index + 1}/{len(chunks)} terkirim ({len(chunk)} file).')
