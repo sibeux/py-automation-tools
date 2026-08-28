@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from collections import defaultdict
 
 BASE_DIR = Path(__file__).parent
 README_PATH = BASE_DIR / "README.md"
@@ -20,20 +21,35 @@ def get_docstring(py_file):
 def generate_tools_section():
     lines = ["## 🛠 Tools yang Tersedia\n"]
 
-    for folder in sorted(BASE_DIR.iterdir()):
-        if not folder.is_dir() or folder.name in EXCLUDE_DIRS:
+    tools_dict = defaultdict(list)
+
+    # Cari semua file .py secara rekursif
+    for py_file in BASE_DIR.rglob("*.py"):
+        if py_file.name in EXCLUDE_FILES:
             continue
-
-        py_files = [
-            f for f in folder.iterdir()
-            if f.suffix == ".py" and f.name not in EXCLUDE_FILES
-        ]
-
-        if not py_files:
+        
+        rel_parts = py_file.relative_to(BASE_DIR).parts
+        
+        # Skip jika ada bagian folder yang masuk dalam EXCLUDE_DIRS
+        if any(part in EXCLUDE_DIRS for part in rel_parts):
             continue
+        
+        # Skip jika file .py berada langsung di root directory
+        if len(rel_parts) == 1:
+            continue
+            
+        rel_folder = py_file.parent.relative_to(BASE_DIR).as_posix()
+        tools_dict[rel_folder].append(py_file)
 
-        lines.append(f"### {folder.name.capitalize()}")
-        for py in sorted(py_files):
+    # Urutkan berdasarkan path folder
+    for folder in sorted(tools_dict.keys()):
+        py_files = sorted(tools_dict[folder])
+        
+        # Format nama folder "folder/subfolder" menjadi "Folder / Subfolder"
+        folder_display = " / ".join(p.capitalize() for p in folder.split("/"))
+        
+        lines.append(f"### {folder_display}")
+        for py in py_files:
             desc = get_docstring(py)
             name = py.stem.replace("_", " ")
             if desc:

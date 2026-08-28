@@ -17,14 +17,22 @@ CC @Sibeux ~ Nasrul Wahabi
 ## 🛠 Tools yang Tersedia
 
 ### Discord
+- **discord audio folder uploader** — Uploader folder audio ke thread Discord.
 - **discord read message thread** — Reader gambar/video dari thread Discord.
 - **discord uploader script** — Uploader gambar/video ke thread Discord.
+
+### Discord / Web_reader
+- **main**
 
 ### Filesystem
 - **diversivied files** — Membagi file menjadi beberapa folder.
 
 ### Formatter
 - **datetime unix** — Formatting current date and time into string representations.
+
+### Formatter / Subtitle-ass / Knb-s1
+- **extract ass** — Script for extracting dialog text only from ass subtitle files.
+- **inject ass** — Script for injecting json dialog format to raw ass subtitle files.
 
 ### Security
 - **password hash generator** — Buat password hash.
