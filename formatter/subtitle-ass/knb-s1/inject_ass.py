@@ -43,8 +43,8 @@ def inject_json_to_ass(ass_filepath, json_filepath, output_filepath):
     print(f"Berhasil membuat file subtitle terjemahan: {output_filepath}")
 
 if __name__ == "__main__":
-    ass_file = "a.ass"           # File ASS asli
-    json_file = "subtitle_raw.json"     # File JSON dari AI
-    output_file = "a_result.ass"     # Nama file ASS baru hasil terjemahan
+    ass_file = rf"C:\Users\Nasrul Wahabi\Downloads\Telegram Desktop\a.ass"           # File ASS asli
+    json_file = rf"C:\Users\Nasrul Wahabi\Downloads\Telegram Desktop\subtitle_raw.json"     # File JSON dari AI
+    output_file = rf"C:\Users\Nasrul Wahabi\Downloads\Telegram Desktop\a_result.ass"     # Nama file ASS baru hasil terjemahan
     
     inject_json_to_ass(ass_file, json_file, output_file)

@@ -55,7 +55,7 @@ def extract_ass_to_json(ass_filepath, json_filepath):
     print("Silakan gunakan file JSON ini ke AI untuk menerjemahkan value 'text'.")
 
 if __name__ == "__main__":
-    ass_file = "a.ass"  # Ganti dengan nama file ass Anda jika berbeda
-    json_file = "subtitle_raw.json"
+    ass_file = rf"C:\Users\Nasrul Wahabi\Downloads\Telegram Desktop\a.ass"  # Ganti dengan nama file ass Anda jika berbeda
+    json_file = rf"C:\Users\Nasrul Wahabi\Downloads\Telegram Desktop\subtitle_raw.json"
     
     extract_ass_to_json(ass_file, json_file)
