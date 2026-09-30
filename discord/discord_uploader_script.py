@@ -46,12 +46,34 @@ if not os.path.isdir(FOLDER_PATH):
 DELAY = 5  # Detik
 
 EKSTENSI_GROUPS = [
-    ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic'),
-    ('.mp4', '.mkv', '.mov', '.avi', '.wmv', '.flv', '.webm', '.m4a'),
-    ('.pdf'),
-    ('.opus', '.mp3')
-]
+    # Images
+    ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic', '.bmp', '.tiff', '.tif'),
 
+    # Videos
+    ('.mp4', '.mkv', '.mov', '.avi', '.wmv', '.flv', '.webm'),
+
+    # Archives
+    ('.rar', '.zip', '.7z'),
+
+    # Audio
+    ('.m4a', '.opus', '.mp3', '.wav', '.flac', '.aac', '.ogg'),
+
+    # Documents
+    ('.pdf', '.txt'),
+
+    # Design
+    (
+        '.psd', '.psb',
+        '.ai', '.eps',
+        '.indd', '.indt',
+        '.xd', '.sketch', '.fig',
+        '.afdesign', '.afphoto',
+        '.svg', '.cdr',
+        '.dwg', '.dxf',
+        '.blend',
+        '.kra', '.clip', '.xcf',
+    ),
+]
 LARGE_FILES_FOLDER = os.path.join(FOLDER_PATH, "large_files")
 # Buat folder large_files jika belum ada
 os.makedirs(LARGE_FILES_FOLDER, exist_ok=True)
@@ -68,7 +90,7 @@ class BatchUploader(discord.Client):
             return
 
         # Ambil semua file gambar/video
-        MAX_SIZE = 10 * 1024 * 1024  # 10 MB dalam bytes
+        MAX_SIZE = 20 * 1024 * 1024  # 20 MB dalam bytes
 
         for current_ext in EKSTENSI_GROUPS:
             print(f"\n--- Memproses kategori: {current_ext} ---")

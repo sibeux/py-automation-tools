@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord PDF Reader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- PDF.js CDN for embedded native rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Top Navbar -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <div>
+                    <h1>Discord PDF Reader</h1>
+                    <span class="badge">Presigned Discord Stream</span>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <form id="fetch-form" class="search-box">
+                <div class="input-wrapper">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="discord-input" 
+                        placeholder="Paste Discord Message Link (https://discord.com/channels/.../.../...)" 
+                        required 
+                        autocomplete="off"
+                    />
+                </div>
+                <button type="submit" id="btn-submit">
+                    <span class="btn-text">Buka PDF</span>
+                    <div class="spinner hidden" id="submit-spinner"></div>
+                </button>
+            </form>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-container">
+            <!-- Sidebar / File List -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>Daftar Dokumen PDF</h2>
+                    <span class="count-badge" id="pdf-count">0 File</span>
+                </div>
+                <div class="file-list" id="file-list">
+                    <div class="empty-state-sidebar">Belum ada file yang dimuat.</div>
+                </div>
+
+                <div class="meta-card hidden" id="meta-card">
+                    <h3>Detail Pesan</h3>
+                    <div class="meta-row">
+                        <span class="meta-label">Channel:</span>
+                        <span class="meta-val" id="meta-channel">-</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Author:</span>
+                        <span class="meta-val" id="meta-author">-</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Viewer Container -->
+            <section class="viewer-section">
+                <!-- Controls bar -->
+                <div class="viewer-toolbar hidden" id="viewer-toolbar">
+                    <div class="doc-info">
+                        <span class="doc-title" id="active-filename">Pilih file</span>
+                        <span class="doc-badge" id="active-size">-</span>
+                    </div>
+                    <div class="toolbar-actions">
+                        <div class="view-switch">
+                            <button class="switch-btn active" id="btn-view-pdf" title="Lihat PDF Asli">PDF Canvas</button>
+                            <button class="switch-btn" id="btn-view-text" title="Lihat Teks Ekstraksi">Teks Ekstrak</button>
+                        </div>
+                        <a id="btn-download" target="_blank" class="action-btn" download title="Download file PDF">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download
+                        </a>
+                        <a id="btn-open-url" target="_blank" class="action-btn" title="Buka Presigned URL langsung di tab baru">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                            Presigned URL
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Viewer Display Area -->
+                <div class="viewer-body" id="viewer-body">
+                    <!-- Initial Welcome / Placeholder Screen -->
+                    <div class="placeholder-screen" id="placeholder-screen">
+                        <div class="placeholder-icon">
+                            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                        </div>
+                        <h3>Mulai Membaca PDF dari Discord</h3>
+                        <p>Tempel link pesan Discord yang berisi lampiran PDF pada kolom pencarian di atas.</p>
+                        <div class="example-box">
+                            <span>Contoh Link:</span>
+                            <code>https://discord.com/channels/973014735316451338/975298274917482556/1554883089195470999</code>
+                        </div>
+                    </div>
+
+                    <!-- PDF Canvas Container (PDF.js rendering) -->
+                    <div class="pdf-canvas-container hidden" id="pdf-container"></div>
+
+                    <!-- Text View Container -->
+                    <div class="text-container hidden" id="text-container">
+                        <div class="text-pages" id="text-pages"></div>
+                    </div>
+
+                    <!-- Loading / Error Message -->
+                    <div class="status-overlay hidden" id="status-overlay">
+                        <div class="spinner-large"></div>
+                        <p id="status-text">Sedang mengambil data pesan Discord...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
