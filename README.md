@@ -21,6 +21,9 @@ CC @Sibeux ~ Nasrul Wahabi
 - **discord read message thread** — Reader gambar/video dari thread Discord.
 - **discord uploader script** — Uploader gambar/video ke thread Discord.
 
+### Discord / Web_pdf_reader
+- **main**
+
 ### Discord / Web_reader
 - **main**
 
@@ -30,9 +33,13 @@ CC @Sibeux ~ Nasrul Wahabi
 ### Formatter
 - **datetime unix** — Formatting current date and time into string representations.
 
-### Formatter / Subtitle-ass / Knb-s1
+### Formatter / Subtitle-ass / Knb-s1-s2
 - **extract ass** — Script for extracting dialog text only from ass subtitle files.
 - **inject ass** — Script for injecting json dialog format to raw ass subtitle files.
+
+### Formatter / Subtitle-ass / Knb-s1-s2 / Ova 22.5
+- **extract ass to json** — Script for extracting dialogue, episode title, and song translations from ASS subtitle files.
+- **inject json to ass** — Script for injecting translated JSON dialogue/texts back into the raw ASS subtitle file.
 
 ### Security
 - **password hash generator** — Buat password hash.

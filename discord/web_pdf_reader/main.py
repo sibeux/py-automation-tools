@@ -225,5 +225,5 @@ app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    print("Memulai server FastAPI Discord PDF Reader di http://127.0.0.1:8000 ...")
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    print("Memulai server FastAPI Discord PDF Reader di http://127.0.0.1:8001 ...")
+    uvicorn.run("main:app", host="127.0.0.1", port=8001, reload=True)
